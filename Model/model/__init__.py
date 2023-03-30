@@ -1,0 +1,1 @@
+from .Basic_GNN import MyGNN
