@@ -12,22 +12,20 @@ class Trainner:
                  model,
                  loss,
                  optimzer,
-                 epochs,
-                 batchsize,
-                 device):
+                 device,
+                 logger):
         self.model = model
         self.loss = loss
-        self.epochs = epochs
-        self.batchsize = batchsize
         self.device = device
         self.opt = optimzer
         self.model.to(device)
         self.loss.to(device)
+        self.logger = logger
 
     def train(self,dataloader):
         total_loss_train = 0
         for index, sample_batched in enumerate(dataloader):
-            progress_bar(index + 1, len(dataloader), bar_length=30)
+            progress_bar('trainning processing',index + 1, len(dataloader), bar_length=30)
             self.opt.zero_grad()
             sample_batched = sample_batched.to(self.device)
             outputs = self.model(sample_batched)
