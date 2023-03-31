@@ -20,7 +20,6 @@ class Validator:
         total_loss_val = 0
         with torch.no_grad():
             for index, sample_batched in enumerate(val_loader):
-                progress_bar('trainning processing',index + 1, len(val_loader), bar_length=30)
                 sample_batched = sample_batched.to(self.device)
                 outputs = self.model(sample_batched)
                 label = sample_batched.y.reshape(-1, 2).to(self.device)
@@ -43,4 +42,4 @@ class Validator:
 
                 scalar_prod = np.clip(sz1 * sz2 * (np.cos(az_true - az_pred)) + (cz1 * cz2), -1, 1)
                 score = np.average(np.abs(np.arccos(scalar_prod)))
-        print(f"score: {score}", f"total_loss_val: {total_loss_val}")
+        self.logger.print_evaluate_information(total_loss_val/len(val_loader),score)
