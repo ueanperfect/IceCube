@@ -4,7 +4,7 @@ from .logger import Logger
 from pathlib import Path
 import pandas as pd
 from ..dataset import IceCubeDataset
-from ..utils import prepare_sensors,progress_bar
+from ..utils import prepare_sensors, progress_bar
 from torch_geometric.loader import DataLoader
 import torch
 
@@ -17,11 +17,11 @@ class Runner():
                  device,
                  logger,
                  max_epoch=12,
-                 batchsize = 32,
+                 batchsize=32,
                  ):
 
-        self.validator = Validator(model,loss,device,logger)
-        self.trainner = Trainner(model,loss,optimzer,device,logger)
+        self.validator = Validator(model, loss, device, logger)
+        self.trainner = Trainner(model, loss, optimzer, device, logger)
         self.model = model
         self.max_epoch = max_epoch
         self.batchsize = batchsize
@@ -44,12 +44,16 @@ class Runner():
 
             event_ids = meta[meta["batch_id"] == b]["event_id"].tolist()
             y = meta[meta["batch_id"] == b][['zenith', 'azimuth']].reset_index(drop=True)
-            dataset = IceCubeDataset(b, event_ids, sensors, mode='train', y=y,)
-            train_len = int(0.7 * len(dataset[:10000]))
+            dataset = IceCubeDataset(b, event_ids, sensors, mode='train', y=y, )
+            train_len = int(0.9 * len(dataset[:10000]))
             train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
             val_loader = DataLoader(dataset[train_len:10000], batch_size=self.batchsize)
-            print(f'data_batch {i}/{len(batch_ids)}')
+
+            self.logger.show_file_progress(i, len(batch_ids))
+
             self.trainner.train(train_loader)
+
             self.validator.val(val_loader)
+
             if (i + 1) % 5 == 0:
                 self.logger.save_checkpoint(self.model, i)
