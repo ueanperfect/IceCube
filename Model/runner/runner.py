@@ -49,9 +49,7 @@ class Runner():
             train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
             val_loader = DataLoader(dataset[train_len:10000], batch_size=self.batchsize)
             print(f'data_batch {i}/{len(batch_ids)}')
-            print("training process")
             self.trainner.train(train_loader)
-            print("testing process")
             self.validator.val(val_loader)
             if (i + 1) % 5 == 0:
                 self.logger.save_checkpoint(self.model, i)
