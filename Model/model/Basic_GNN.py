@@ -91,10 +91,8 @@ class MyGNN(nn.Module):
         self.n_blocks = n_blocks
         self.head = SAGEConv(in_channels, hidden_channels)
         c_growth = hidden_channels
-        self.gnn = nn.Sequential(*[DenseDynBlock(hidden_channels + i * c_growth, c_growth)
-                                   for i in range(n_blocks - 1)])
-        fusion_dims = int(
-            hidden_channels * self.n_blocks + c_growth * ((1 + self.n_blocks - 1) * (self.n_blocks - 1) / 2))
+        self.gnn = nn.Sequential(*[DenseDynBlock(hidden_channels + i * c_growth, c_growth) for i in range(n_blocks - 1)])
+        fusion_dims = int(hidden_channels * self.n_blocks + c_growth * ((1 + self.n_blocks - 1) * (self.n_blocks - 1) / 2))
         self.linear = nn.Linear(fusion_dims, out_channels)
 
     def forward(self, data):
