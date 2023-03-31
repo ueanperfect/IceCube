@@ -1,1 +1,1 @@
-from .trainner import basic_gnn_trainner
+from .trainner import Trainner
