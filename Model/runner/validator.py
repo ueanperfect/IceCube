@@ -1,6 +1,17 @@
 import torch
 from ..utils import progress_bar
 class Validator:
+
+    def __init__(self,
+                 model,
+                 loss,
+                 device,
+                 logger):
+        self.model = model
+        self.loss = loss
+        self.device = device
+        self.logger = logger
+
     def val(self,val_loader):
         self.model.eval()
         print("\ntesting process")

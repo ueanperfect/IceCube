@@ -12,17 +12,15 @@ class Trainner:
                  model,
                  loss,
                  optimzer,
-                 epochs,
-                 batchsize,
-                 device):
+                 device,
+                 logger):
         self.model = model
         self.loss = loss
-        self.epochs = epochs
-        self.batchsize = batchsize
         self.device = device
         self.opt = optimzer
         self.model.to(device)
         self.loss.to(device)
+        self.logger = logger
 
     def train(self,dataloader):
         total_loss_train = 0
