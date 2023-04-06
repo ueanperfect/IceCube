@@ -12,11 +12,12 @@ class EuclideanGraphBuilder(nn.Module):
     """Builds graph according to Euclidean distance between nodes.
     See https://arxiv.org/pdf/1809.06166.pdf.
     """
+
     def __init__(
-        self,
-        sigma: float,
-        threshold: float = 0.0,
-        columns: List[int] = None,
+            self,
+            sigma: float,
+            threshold: float = 0.0,
+            columns: List[int] = None,
     ):
         """Construct `EuclideanGraphBuilder`."""
         # Base class constructor
@@ -43,7 +44,7 @@ class EuclideanGraphBuilder(nn.Module):
 
         distance_matrix = calculate_distance_matrix(xyz_coords)
         affinity_matrix = torch.exp(
-            -0.5 * distance_matrix**2 / self._sigma**2
+            -0.5 * distance_matrix ** 2 / self._sigma ** 2
         )
 
         # Use softmax to normalise all adjacencies to one for each node
@@ -64,10 +65,12 @@ class EuclideanGraphBuilder(nn.Module):
 
         return data
 
+
 class DenseDynBlock(nn.Module):
     """
     Dense Dynamic graph convolution block
     """
+
     def __init__(self, in_channels, out_channels=64, sigma=0.5):
         super(DenseDynBlock, self).__init__()
         self.GraphBuilder = EuclideanGraphBuilder(sigma=sigma)
@@ -91,8 +94,10 @@ class MyGNN(nn.Module):
         self.n_blocks = n_blocks
         self.head = SAGEConv(in_channels, hidden_channels)
         c_growth = hidden_channels
-        self.gnn = nn.Sequential(*[DenseDynBlock(hidden_channels + i * c_growth, c_growth) for i in range(n_blocks - 1)])
-        fusion_dims = int(hidden_channels * self.n_blocks + c_growth * ((1 + self.n_blocks - 1) * (self.n_blocks - 1) / 2))
+        self.gnn = nn.Sequential(
+            *[DenseDynBlock(hidden_channels + i * c_growth, c_growth) for i in range(n_blocks - 1)])
+        fusion_dims = int(
+            hidden_channels * self.n_blocks + c_growth * ((1 + self.n_blocks - 1) * (self.n_blocks - 1) / 2))
         self.linear = nn.Linear(fusion_dims, out_channels)
 
     def forward(self, data):
@@ -105,4 +110,7 @@ class MyGNN(nn.Module):
         feats = torch.cat(feats, 1)
         x = pyg_nn.global_mean_pool(feats, data.batch)
         out = F.relu(self.linear(x))
+        # out = F.sigmoid(out)
+        # out[:, 0] = out[:, 0] * 2 * torch.pi
+        # out[:, 1] = out[:, 1] * torch.pi
         return out

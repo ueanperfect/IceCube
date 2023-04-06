@@ -38,8 +38,8 @@ class Logger():
         print("{}_{} has been saved \n".format(self.model_name, epoch_number))
 
     def print_evaluate_information(self, loss, metric):
-        logging.info(f"Val Result:\nsocore : {(metric):>0.1f}, val loss: {loss:>8f}")
-        print(f"Val Result:\nsocore: {(metric):>0.1f}, val loss: {loss:>8f}")
+        logging.info(f"Val Result:\nsocore : {(metric):>8f}, val loss: {loss:>8f}")
+        print(f"Val Result:\nsocore: {(metric):>8f}, val loss: {loss:>8f}")
 
     def print_training_information(self, loss, current, size):
         logging.info(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
