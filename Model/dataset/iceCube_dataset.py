@@ -93,7 +93,7 @@ class IceCubeDatasetLstm(Dataset):
     ):
         super().__init__(transform, pre_transform, pre_filter)
 
-        if len(batch_ids) > 8:
+        if len(batch_ids) > 12:
             raise ValueError(" your input file is too much, please load less and seperate batch")
         self.train_x = None
         self.train_y = None

@@ -75,14 +75,12 @@ class RunnerLSTM():
         self.batch_ids_s = batch_ids_s
 
     def run(self):
+        dataset = IceCubeDatasetLstm(batch_ids=self.batch_ids_s)
+        train_len = int(0.9 * len(dataset))
+        train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
+        val_loader = DataLoader(dataset[train_len], batch_size=self.batchsize)
         for i_index in range(self.max_epoch):
             self.logger.show_progress(i_index)
-            dataset = IceCubeDatasetLstm(batch_ids=self.batch_ids_s)
-            train_len = int(0.95 * len(dataset[:5000]))
-            train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
-            val_loader = DataLoader(dataset[train_len:5000], batch_size=self.batchsize)
-            first_param = next(self.model.parameters())
-            print(first_param.data)
             self.trainner.train(train_loader)
             self.validator.val(val_loader)
             self.logger.save_checkpoint(self.model, i_index)
