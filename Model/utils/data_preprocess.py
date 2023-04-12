@@ -5,6 +5,7 @@ from torch import Tensor
 import torch
 import numpy as np
 from pathlib import Path
+import math
 
 
 def ice_transparency(data_path, datum=1950):
@@ -63,5 +64,14 @@ def prepare_sensors():
     sensors["z"] /= 500
     sensors["qe"] -= 1.25
     sensors["qe"] /= 0.25
-
     return sensors
+
+def radius2xyz(azi,ele):
+    x = math.cos(math.radians(azi)) * math.sin(math.radians(ele))
+    y = math.sin(math.radians(azi)) * math.sin(math.radians(ele))
+    z = math.cos(math.radians(ele))
+
+
+
+def xyz2radius(x,y,z):
+    pass

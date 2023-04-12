@@ -18,8 +18,9 @@ class Logger():
         logs_list = os.listdir(self.path)
         if self.model_name not in logs_list:
             os.mkdir(os.path.join(self.path, self.model_name))
-        data_time = str(datetime.datetime.now())
-        work_dir = os.path.join(self.path, self.model_name, data_time)
+        now = datetime.datetime.now()
+        date_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+        work_dir = os.path.join(self.path, self.model_name, date_string)
         os.mkdir(work_dir)
         os.mkdir(os.path.join(work_dir, 'checkpoints'))
         os.mkdir(os.path.join(work_dir, 'logger'))
@@ -31,19 +32,23 @@ class Logger():
         logging.basicConfig(filename=logging_path, format='%(asctime)s-%(levelname)s: %(message)s', level=logging.DEBUG)
 
     def save_checkpoint(self, model, epoch_number):
-        checkpoints_name = "{}_{}_{}".format(model.model_name, str(epoch_number+1), '.pth')
+        checkpoints_name = "{}_{}_{}".format(self.model_name, str(epoch_number + 1), '.pth')
         torch.save(model.state_dict(), os.path.join(self.current_path, 'checkpoints', checkpoints_name))
-        logging.info("{}_{} has been saved \n".format(model.model_name, epoch_number))
-        print("{}_{} has been saved \n".format(model.model_name, epoch_number))
+        logging.info("{}_{} has been saved \n".format(self.model_name, epoch_number))
+        print("{}_{} has been saved \n".format(self.model_name, epoch_number))
 
-    def print_evaluate_information(self, loss, acc):
-        logging.info(f"Test Error: \n Accuracy: {(100 * acc):>0.1f}%, Avg loss: {loss:>8f}")
-        print(f"Test Error: \n Accuracy: {(100 * acc):>0.1f}%, Avg loss: {loss:>8f}")
+    def print_evaluate_information(self, loss, metric):
+        logging.info(f"Val Result:\nsocore : {(metric):>8f}, val loss: {loss:>8f}")
+        print(f"Val Result:\nsocore: {(metric):>8f}, val loss: {loss:>8f}")
 
     def print_training_information(self, loss, current, size):
         logging.info(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
         print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-    def show_progress(self,epoch):
+    def show_file_progress(self, file_id: int, file_number: int):
+        logging.info(f"Start training the {file_id}/{file_number} st file")
+        print(f"Start training the {file_id}/{file_number} st file")
+
+    def show_progress(self, epoch):
         logging.info(f"Start training the {epoch}st epoch")
         print(f"Start training the {epoch}st epoch")
