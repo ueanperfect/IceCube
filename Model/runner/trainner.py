@@ -69,7 +69,7 @@ class TrainnerLSTM:
 
     def train(self, dataloader):
         iter_number = len(dataloader)
-        record_number = int(iter_number / 10)
+        record_number = int(iter_number / 20)
         for index, (x, y, true_label) in enumerate(dataloader):
             self.opt.zero_grad()
             x = x.to(self.device)

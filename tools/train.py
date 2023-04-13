@@ -13,7 +13,7 @@ batch_size = 32  # 批量大小
 # 创建一个 Transformer Encoder 实例
 model = TransformerEncoder(d_model, num_heads, d_ff, num_layers)
 
-opt = torch.optim.AdamW(model.parameters(), lr=0.00001)
+opt = torch.optim.AdamW(model.parameters(), lr=0.0000001)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 loss = nn.CrossEntropyLoss().to(device)
 model.to(device)
@@ -25,8 +25,10 @@ runner = RunnerLSTM(
     optimzer=opt,
     device=device,
     logger=logger,
-    batch_ids_s=[101,102,103,104,105,400,401,402,403,404],
-    max_epoch=1000,
-    batchsize=2048
+    batch_ids_s=[[101,102,103,104,105,400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,419,512,513,514,515,516,517,518]],
+    # batch_ids_s=[[101,102,512]],
+    max_epoch=2000,
+    batchsize=4096,
+    resume="checkpoints/transformer_encoder/2023-04-13_00-00-28/checkpoints/transformer_encoder_1_66_.pth"
 )
 runner.run()

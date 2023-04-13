@@ -15,12 +15,13 @@ class MultiHeadSelfAttention(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
-
+        mask = create_padding_mask(x,0)
         query = self.query(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
         key = self.key(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
         value = self.value(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
 
         attention_scores = torch.matmul(query, key.transpose(-2, -1)) / (self.d_k ** 0.5)
+        attention_scores = attention_scores.masked_fill_(mask,-1e9)
         attention_weights = torch.softmax(attention_scores, dim=-1)
         context = torch.matmul(attention_weights, value).transpose(1, 2).contiguous().view(batch_size, -1, self.num_heads * self.d_k)
 
@@ -67,6 +68,10 @@ class TransformerEncoder(nn.Module):
         x = self.mlp_2(x)
         x = self.softmax(x)
         return x
+
+def create_padding_mask(src, pad_token_id):
+    mask = (src == pad_token_id).any(dim=-1).unsqueeze(1).unsqueeze(2)
+    return mask
 
 
 

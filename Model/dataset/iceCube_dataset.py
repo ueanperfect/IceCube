@@ -93,19 +93,29 @@ class IceCubeDatasetLstm(Dataset):
     ):
         super().__init__(transform, pre_transform, pre_filter)
 
-        if len(batch_ids) > 12:
+        if len(batch_ids) > 50:
             raise ValueError(" your input file is too much, please load less and seperate batch")
         self.train_x = None
         self.train_y = None
         INPUT_PATH = "data/LSTM_data/"
         for batch_id in batch_ids:
-            data = np.load(INPUT_PATH + f"pointpicker_mpc128_n9_batch_{batch_id}.npz")
-            if self.train_x is None:
-                self.train_x = data["x"]
-                self.train_y = data["y"]
-            else:
-                self.train_x = np.append(self.train_x, data["x"], axis=0)
-                self.train_y = np.append(self.train_y, data["y"], axis=0)
+            try:
+                data = np.load(INPUT_PATH + f"pointpicker_mpc128_n9_batch_{batch_id}.npz")
+                if self.train_x is None:
+                    self.train_x = data["x"]
+                    self.train_y = data["y"]
+                else:
+                    self.train_x = np.append(self.train_x, data["x"], axis=0)
+                    self.train_y = np.append(self.train_y, data["y"], axis=0)
+            except:
+                data = np.load(INPUT_PATH + f"pointpicker_mpc256_n9_batch_{batch_id}.npz")
+                if self.train_x is None:
+                    self.train_x = data["x"][:,:128,:]
+                    self.train_y = data["y"]
+                else:
+                    self.train_x = np.append(self.train_x, data["x"][:,:128,:], axis=0)
+                    self.train_y = np.append(self.train_y, data["y"], axis=0)
+
 
         self.train_x[:, :, 0] /= self.train_x[:, :, 0].max()
         self.train_x[:, :, 1] /= self.train_x[:, :, 1].max()
@@ -116,6 +126,11 @@ class IceCubeDatasetLstm(Dataset):
         self.train_x = torch.from_numpy(self.train_x[:,:,:8])
         self.train_x = self.train_x.to(torch.float32)
         self.train_y = torch.from_numpy(self.train_y)
+
+        # 对数据顺序进行打乱
+        # indices = torch.randperm(len(self.train_x))
+        # self.train_x = self.train_x[indices]
+        # self.train_y = self.train_y[indices]
 
     def y_to_code(self, batch_y, bin_num=16):
         azimuth_edges = np.linspace(0, 2 * np.pi, bin_num + 1)

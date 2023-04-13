@@ -31,11 +31,11 @@ class Logger():
         logging_path = os.path.join(self.current_path, 'logger', logger_file_name)
         logging.basicConfig(filename=logging_path, format='%(asctime)s-%(levelname)s: %(message)s', level=logging.DEBUG)
 
-    def save_checkpoint(self, model, epoch_number):
-        checkpoints_name = "{}_{}_{}".format(self.model_name, str(epoch_number + 1), '.pth')
+    def save_checkpoint(self, model,file_batch_index, epoch_number):
+        checkpoints_name = "{}_{}_{}_{}".format(self.model_name,str(file_batch_index+1), str(epoch_number + 1), '.pth')
         torch.save(model.state_dict(), os.path.join(self.current_path, 'checkpoints', checkpoints_name))
-        logging.info("{}_{} has been saved \n".format(self.model_name, epoch_number))
-        print("{}_{} has been saved \n".format(self.model_name, epoch_number))
+        logging.info("{} has been saved \n".format(checkpoints_name))
+        print("{} has been saved \n".format(checkpoints_name))
 
     def print_evaluate_information(self, loss, metric):
         logging.info(f"Val Result:\nsocore : {(metric):>8f}, val loss: {loss:>8f}")
@@ -50,5 +50,9 @@ class Logger():
         print(f"Start training the {file_id}/{file_number} st file")
 
     def show_progress(self, epoch):
-        logging.info(f"Start training the {epoch}st epoch")
-        print(f"Start training the {epoch}st epoch")
+        logging.info(f"Start training the {epoch+1}st epoch")
+        print(f"Start training the {epoch+1}st epoch")
+
+    def running_batch_information(self,file_batch_id):
+        logging.info(f"Start training the {file_batch_id+1}st file batch")
+        print(f"Start training the {file_batch_id+1}st file batch")
