@@ -1,5 +1,5 @@
-from .validator import Validator, ValidatorLSTM
-from .trainner import Trainner, TrainnerLSTM
+from .validator import Validator, ValidatorLSTM,ValidatorDHM
+from .trainner import Trainner, TrainnerLSTM,TrainnerDHM
 from .logger import Logger
 from pathlib import Path
 import pandas as pd
@@ -91,6 +91,54 @@ class RunnerLSTM():
                 self.validator.val(val_loader)
                 if (i_index+1) % 3 == 0:
                     self.logger.save_checkpoint(self.model, i, i_index)
+            del train_loader
+            del val_loader
+            del dataset
+
+class RunnerDHM():
+    def __init__(self,
+                 model,
+                 loss,
+                 optimzer,
+                 device,
+                 logger,
+                 batch_ids_s,
+                 max_epoch=12,
+                 batchsize=32,
+                 resume_model = False,
+                 resume_loss = False,
+                 ):
+        if resume_model:
+            state_dict = torch.load(resume_model)
+            model.load_state_dict(state_dict)
+            print("load the model successfully")
+        if resume_loss:
+            state_dict = torch.load(resume_loss)
+            loss.load_state_dict(state_dict)
+            print("load the model successfully")
+        self.loss = loss
+        self.validator = ValidatorDHM(model, loss, device, logger)
+        self.trainner = TrainnerDHM(model, loss, optimzer, device, logger)
+        self.model = model
+        self.max_epoch = max_epoch
+        self.batchsize = batchsize
+        self.logger = logger
+        self.batch_ids_s = batch_ids_s
+
+    def run(self):
+        for i in range(len(self.batch_ids_s)):
+            self.logger.running_batch_information(i)
+            dataset = IceCubeDatasetLstm(batch_ids=self.batch_ids_s[i])
+            train_len = int(0.9 * len(dataset))
+            train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
+            val_loader = DataLoader(dataset[train_len:], batch_size=self.batchsize)
+            for i_index in range(self.max_epoch):
+                self.logger.show_progress(i_index)
+                self.trainner.train(train_loader)
+                self.validator.val(val_loader)
+                if (i_index+1) % 3 == 0:
+                    self.logger.save_checkpoint(self.model, i, i_index)
+                    self.logger.save_checkpoint_specifiy_name(self.loss,"loss", i, i_index)
             del train_loader
             del val_loader
             del dataset

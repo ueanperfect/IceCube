@@ -35,7 +35,7 @@ def calculate_distance_matrix(xyz_coords: Tensor) -> Tensor:
 
 def prepare_sensors():
     COMP_NAME = "icecube-neutrinos-in-deep-ice"
-    INPUT_PATH = Path(f"data/{COMP_NAME}")
+    INPUT_PATH = Path(f"../../{COMP_NAME}")
     sensors = pd.read_csv(INPUT_PATH / "sensor_geometry.csv").astype(
         {
             "sensor_id": np.int16,

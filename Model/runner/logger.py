@@ -37,6 +37,12 @@ class Logger():
         logging.info("{} has been saved \n".format(checkpoints_name))
         print("{} has been saved \n".format(checkpoints_name))
 
+    def save_checkpoint_specifiy_name(self, model,name,file_batch_index, epoch_number):
+        checkpoints_name = "{}_{}_{}_{}".format(name,str(file_batch_index+1), str(epoch_number + 1), '.pth')
+        torch.save(model.state_dict(), os.path.join(self.current_path, 'checkpoints', checkpoints_name))
+        logging.info("{} has been saved \n".format(checkpoints_name))
+        print("{} has been saved \n".format(checkpoints_name))
+
     def print_evaluate_information(self, loss, metric):
         logging.info(f"Val Result:\nsocore : {(metric):>8f}, val loss: {loss:>8f}")
         print(f"Val Result:\nsocore: {(metric):>8f}, val loss: {loss:>8f}")

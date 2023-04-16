@@ -1,3 +1,3 @@
-from .trainner import Trainner
-from .runner import RunnerOriginal,RunnerLSTM
+from .trainner import *
+from .runner import *
 from .logger import Logger

@@ -57,8 +57,8 @@ class TransformerEncoder(nn.Module):
         self.layers = nn.ModuleList([TransformerEncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
         self.relu = nn.functional.relu
         self.softmax = nn.functional.softmax
-        self.mlp_1 = nn.Linear(d_model*128,2048,bias=True)
-        self.mlp_2 = nn.Linear(2048,256)
+        self.mlp_1 = nn.Linear(d_model*128,4096,bias=True)
+        self.mlp_2 = nn.Linear(4096,144)
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
@@ -66,7 +66,6 @@ class TransformerEncoder(nn.Module):
         x = self.mlp_1(x)
         x = self.relu(x)
         x = self.mlp_2(x)
-        x = self.softmax(x)
         return x
 
 def create_padding_mask(src, pad_token_id):

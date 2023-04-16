@@ -23,8 +23,8 @@ class IceCubeDataset(Dataset):
         super().__init__(transform, pre_transform, pre_filter)
 
         COMP_NAME = "icecube-neutrinos-in-deep-ice"
-        INPUT_PATH = Path(f"data/{COMP_NAME}")
-        OUTPUT_PATH = Path(f"data/{COMP_NAME}")
+        INPUT_PATH = Path(f"../../{COMP_NAME}")
+        OUTPUT_PATH = Path(f"../../{COMP_NAME}")
         MODEL_CACHE = Path("/mnt/storage/model_cache/torch")
         TRANSPARENCY_PATH = INPUT_PATH / "ice_transparency.txt"
 
@@ -121,18 +121,13 @@ class IceCubeDatasetLstm(Dataset):
         self.train_x[:, :, 1] /= self.train_x[:, :, 1].max()
         self.train_x[:, :, 3:] /= 600  # space
         self.true_label = torch.from_numpy(self.train_y)
-        self.train_y = self.y_to_code(self.train_y, 16)
+        self.train_y = self.y_to_code(self.train_y, 10)
 
         self.train_x = torch.from_numpy(self.train_x[:,:,:8])
         self.train_x = self.train_x.to(torch.float32)
         self.train_y = torch.from_numpy(self.train_y)
 
-        # 对数据顺序进行打乱
-        # indices = torch.randperm(len(self.train_x))
-        # self.train_x = self.train_x[indices]
-        # self.train_y = self.train_y[indices]
-
-    def y_to_code(self, batch_y, bin_num=16):
+    def y_to_code(self, batch_y, bin_num=12):
         azimuth_edges = np.linspace(0, 2 * np.pi, bin_num + 1)
         zenith_edges_flat = np.linspace(0, np.pi, bin_num + 1)
         zenith_edges = list()
