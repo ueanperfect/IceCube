@@ -26,24 +26,18 @@ def initial_data(batch_id):
 
 
 def calculate_angles(direction):
-    # 计算方位角
     azimuth = np.arctan2(direction[1], direction[0])
     if azimuth < 0:
         azimuth += 2 * np.pi
-
-    # 计算仰角
     elevation = np.arctan2(direction[2], np.sqrt(direction[0] ** 2 + direction[1] ** 2))
-
     return azimuth, elevation
 
 
 def extract_direction(batch_id, event_id):
     dataset = initial_data(batch_id)[event_id]
     points = dataset.x.numpy()[:, :3]
-    # 进行PCA
     pca = PCA(n_components=1)
     pca.fit(points)
-    # 输出第一主成分（直线的方向向量）
     direction = pca.components_[0]
     center = np.mean(points, axis=0)
     azimuth_rad, elevation_rad = calculate_angles(direction)

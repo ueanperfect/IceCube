@@ -1,15 +1,14 @@
-from .validator import Validator, ValidatorLSTM,ValidatorDHM
-from .trainner import Trainner, TrainnerLSTM,TrainnerDHM
-from .logger import Logger
+from .validator import ValidatorRegression, ValidatorClassification
+from .trainner import TrainnerRegression, TrainnerClassification
 from pathlib import Path
 import pandas as pd
-from ..dataset import IceCubeDataset, IceCubeDatasetLstm
-from ..utils import prepare_sensors, progress_bar
+from ..dataset import IceCubeDataset, IceCubeDatasetClassification
+from ..utils import prepare_sensors
 from torch_geometric.loader import DataLoader
 import torch
 
 
-class RunnerOriginal():
+class RunnerRegression():
     def __init__(self,
                  model,
                  loss,
@@ -20,8 +19,8 @@ class RunnerOriginal():
                  batchsize=32,
                  ):
 
-        self.validator = Validator(model, loss, device, logger)
-        self.trainner = Trainner(model, loss, optimzer, device, logger)
+        self.validator = ValidatorRegression(model, loss, device, logger)
+        self.trainner = TrainnerRegression(model, loss, optimzer, device, logger)
         self.model = model
         self.max_epoch = max_epoch
         self.batchsize = batchsize
@@ -54,7 +53,7 @@ class RunnerOriginal():
                 self.logger.save_checkpoint(self.model, i)
 
 
-class RunnerLSTM():
+class RunnerClassification():
     def __init__(self,
                  model,
                  loss,
@@ -64,81 +63,37 @@ class RunnerLSTM():
                  batch_ids_s,
                  max_epoch=12,
                  batchsize=32,
-                 resume = False,
+                 bin_number=10,
+                 number_epoch_per_save=2,
+                 resume = False
                  ):
         if resume:
             state_dict = torch.load(resume)
             model.load_state_dict(state_dict)
             print("load the model successfully")
-        self.validator = ValidatorLSTM(model, loss, device, logger)
-        self.trainner = TrainnerLSTM(model, loss, optimzer, device, logger)
+        self.validator = ValidatorClassification(model, loss, device, logger,bin_number)
+        self.trainner = TrainnerClassification(model, loss, optimzer, device, logger)
         self.model = model
         self.max_epoch = max_epoch
         self.batchsize = batchsize
         self.logger = logger
         self.batch_ids_s = batch_ids_s
+        self.number_epoch_per_save = number_epoch_per_save
+        self.bin_number = bin_number
 
     def run(self):
         for i in range(len(self.batch_ids_s)):
             self.logger.running_batch_information(i)
-            dataset = IceCubeDatasetLstm(batch_ids=self.batch_ids_s[i])
+            dataset = IceCubeDatasetClassification(batch_ids=self.batch_ids_s[i],bin_number=self.bin_number)
             train_len = int(0.9 * len(dataset))
-            train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
+            train_loader = DataLoader(dataset, batch_size=self.batchsize)
             val_loader = DataLoader(dataset[train_len:], batch_size=self.batchsize)
             for i_index in range(self.max_epoch):
                 self.logger.show_progress(i_index)
-                self.trainner.train(train_loader)
+                # self.trainner.train(train_loader)
                 self.validator.val(val_loader)
-                if (i_index+1) % 3 == 0:
+                if (i_index+1) % self.number_epoch_per_save == 0:
                     self.logger.save_checkpoint(self.model, i, i_index)
-            del train_loader
-            del val_loader
-            del dataset
-
-class RunnerDHM():
-    def __init__(self,
-                 model,
-                 loss,
-                 optimzer,
-                 device,
-                 logger,
-                 batch_ids_s,
-                 max_epoch=12,
-                 batchsize=32,
-                 resume_model = False,
-                 resume_loss = False,
-                 ):
-        if resume_model:
-            state_dict = torch.load(resume_model)
-            model.load_state_dict(state_dict)
-            print("load the model successfully")
-        if resume_loss:
-            state_dict = torch.load(resume_loss)
-            loss.load_state_dict(state_dict)
-            print("load the model successfully")
-        self.loss = loss
-        self.validator = ValidatorDHM(model, loss, device, logger)
-        self.trainner = TrainnerDHM(model, loss, optimzer, device, logger)
-        self.model = model
-        self.max_epoch = max_epoch
-        self.batchsize = batchsize
-        self.logger = logger
-        self.batch_ids_s = batch_ids_s
-
-    def run(self):
-        for i in range(len(self.batch_ids_s)):
-            self.logger.running_batch_information(i)
-            dataset = IceCubeDatasetLstm(batch_ids=self.batch_ids_s[i])
-            train_len = int(0.9 * len(dataset))
-            train_loader = DataLoader(dataset[0:train_len], batch_size=self.batchsize)
-            val_loader = DataLoader(dataset[train_len:], batch_size=self.batchsize)
-            for i_index in range(self.max_epoch):
-                self.logger.show_progress(i_index)
-                self.trainner.train(train_loader)
-                self.validator.val(val_loader)
-                if (i_index+1) % 3 == 0:
-                    self.logger.save_checkpoint(self.model, i, i_index)
-                    self.logger.save_checkpoint_specifiy_name(self.loss,"loss", i, i_index)
             del train_loader
             del val_loader
             del dataset

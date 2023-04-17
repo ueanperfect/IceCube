@@ -51,14 +51,14 @@ class TransformerEncoderLayer(nn.Module):
         ff_output = self.feed_forward(x)
         return self.norm2(x + ff_output)
 
-class TransformerEncoder(nn.Module):
-    def __init__(self, d_model, num_heads, d_ff, num_layers):
-        super(TransformerEncoder, self).__init__()
+class TransformerEncoderV1(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff, num_layers,bin_number):
+        super(TransformerEncoderV1, self).__init__()
         self.layers = nn.ModuleList([TransformerEncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
         self.relu = nn.functional.relu
         self.softmax = nn.functional.softmax
         self.mlp_1 = nn.Linear(d_model*128,4096,bias=True)
-        self.mlp_2 = nn.Linear(4096,144)
+        self.mlp_2 = nn.Linear(4096,bin_number*bin_number)
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
