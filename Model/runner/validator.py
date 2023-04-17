@@ -3,7 +3,7 @@ from ..utils import progress_bar
 import numpy as np
 
 
-class Validator:
+class ValidatorRegression:
     def __init__(self,
                  model,
                  loss,
@@ -45,20 +45,21 @@ class Validator:
         self.logger.print_evaluate_information(total_loss_val / len(val_loader), score / len(val_loader))
 
 
-class ValidatorLSTM:
+class ValidatorClassification:
     def __init__(self,
                  model,
                  loss,
                  device,
-                 logger):
+                 logger,
+                 bin_number):
         self.model = model
         self.loss = loss
         self.device = device
         self.logger = logger
-        self.angle_bin_vector = self.caculate_angle_bin_vector(bin_num=16)
-        a = 1
+        self.bin_number = bin_number
+        self.angle_bin_vector = self.caculate_angle_bin_vector(bin_num=bin_number)
 
-    def caculate_angle_bin_vector(self, bin_num=16):
+    def caculate_angle_bin_vector(self, bin_num=12):
         azimuth_edges = np.linspace(0, 2 * np.pi, bin_num + 1)
         zenith_edges_flat = np.linspace(0, np.pi, bin_num + 1)
         zenith_edges = list()
@@ -96,7 +97,7 @@ class ValidatorLSTM:
         angle_bin_vector[:, :, 2] = angle_bin_vector_mean_z
         return angle_bin_vector
 
-    def pred_to_angle(self, pred, epsilon=1e-8, bin_num=16):
+    def pred_to_angle(self, pred, epsilon=1e-8, bin_num=12):
         # convert prediction to vector
         pred_vector = (pred.reshape((-1, bin_num * bin_num, 1)) * self.angle_bin_vector).sum(axis=1)
 
@@ -131,7 +132,7 @@ class ValidatorLSTM:
                 # calculate score
                 az_true = true_label[:, 0].cpu().numpy()
                 zen_true = true_label[:, 1].cpu().numpy()
-                az_pred, zen_pred = self.pred_to_angle(outputs.cpu().numpy())
+                az_pred, zen_pred = self.pred_to_angle(outputs.cpu().numpy(),bin_num=self.bin_number)
                 sz1 = np.sin(zen_true)
                 cz1 = np.cos(zen_true)
                 sz2 = np.sin(zen_pred)

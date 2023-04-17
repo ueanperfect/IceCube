@@ -1,13 +1,7 @@
-import pandas as pd
-from pathlib import Path
-from ..dataset import IceCubeDataset
-from ..utils import prepare_sensors, progress_bar
-from torch_geometric.loader import DataLoader
-from tqdm import tqdm
 import torch
 
 
-class Trainner:
+class TrainnerRegression:
     def __init__(self,
                  model,
                  loss,
@@ -38,7 +32,7 @@ class Trainner:
                 self.logger.print_training_information(loss.cpu().item(), index, len(dataloader))
 
 
-class TrainnerLSTM:
+class TrainnerClassification:
     def __init__(self,
                  model,
                  loss,
@@ -53,7 +47,7 @@ class TrainnerLSTM:
         self.loss.to(device)
         self.logger = logger
 
-    def accuracy(self,y_pred, y_true):
+    def accuracy(self, y_pred, y_true):
         """
         计算模型的准确率
         y_pred: 模型预测的结果，大小为[N, C]，其中N为样本数，C为类别数
@@ -69,7 +63,7 @@ class TrainnerLSTM:
 
     def train(self, dataloader):
         iter_number = len(dataloader)
-        record_number = int(iter_number / 10)
+        record_number = int(iter_number / 20)
         for index, (x, y, true_label) in enumerate(dataloader):
             self.opt.zero_grad()
             x = x.to(self.device)
@@ -80,6 +74,7 @@ class TrainnerLSTM:
             loss.backward()
             self.opt.step()
             if index % record_number == 0:
-                acc = self.accuracy(outputs,y)
+                acc = self.accuracy(outputs, y)
                 print(f"acc : {acc:.4f}")
                 self.logger.print_training_information(loss.cpu().item(), index, len(dataloader))
+

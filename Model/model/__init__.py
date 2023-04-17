@@ -1,4 +1,3 @@
 from .Basic_GNN import MyGNN
-from .loss import basic_loss
-from .transformer import TransformerModel
-from .transformer_encoder import TransformerEncoder
+from .transformer_encoder_v1 import TransformerEncoderV1
+from .transformer_encoder_v2 import transformer_encoder_v2

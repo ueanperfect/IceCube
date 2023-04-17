@@ -15,12 +15,13 @@ class MultiHeadSelfAttention(nn.Module):
 
     def forward(self, x):
         batch_size = x.size(0)
-
+        mask = create_padding_mask(x,0)
         query = self.query(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
         key = self.key(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
         value = self.value(x).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
 
         attention_scores = torch.matmul(query, key.transpose(-2, -1)) / (self.d_k ** 0.5)
+        attention_scores = attention_scores.masked_fill_(mask,-1e9)
         attention_weights = torch.softmax(attention_scores, dim=-1)
         context = torch.matmul(attention_weights, value).transpose(1, 2).contiguous().view(batch_size, -1, self.num_heads * self.d_k)
 
@@ -50,14 +51,14 @@ class TransformerEncoderLayer(nn.Module):
         ff_output = self.feed_forward(x)
         return self.norm2(x + ff_output)
 
-class TransformerEncoder(nn.Module):
-    def __init__(self, d_model, num_heads, d_ff, num_layers):
-        super(TransformerEncoder, self).__init__()
+class TransformerEncoderV1(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff, num_layers,bin_number):
+        super(TransformerEncoderV1, self).__init__()
         self.layers = nn.ModuleList([TransformerEncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
         self.relu = nn.functional.relu
         self.softmax = nn.functional.softmax
-        self.mlp_1 = nn.Linear(d_model*128,2048,bias=True)
-        self.mlp_2 = nn.Linear(2048,256)
+        self.mlp_1 = nn.Linear(d_model*128,4096,bias=True)
+        self.mlp_2 = nn.Linear(4096,bin_number*bin_number)
     def forward(self, x):
         for layer in self.layers:
             x = layer(x)
@@ -65,8 +66,11 @@ class TransformerEncoder(nn.Module):
         x = self.mlp_1(x)
         x = self.relu(x)
         x = self.mlp_2(x)
-        x = self.softmax(x)
         return x
+
+def create_padding_mask(src, pad_token_id):
+    mask = (src == pad_token_id).any(dim=-1).unsqueeze(1).unsqueeze(2)
+    return mask
 
 
 

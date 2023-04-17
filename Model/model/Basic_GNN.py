@@ -7,7 +7,6 @@ import torch_geometric.nn as pyg_nn
 import torch
 from ..utils import calculate_distance_matrix
 
-
 class EuclideanGraphBuilder(nn.Module):
     """Builds graph according to Euclidean distance between nodes.
     See https://arxiv.org/pdf/1809.06166.pdf.
@@ -110,7 +109,4 @@ class MyGNN(nn.Module):
         feats = torch.cat(feats, 1)
         x = pyg_nn.global_mean_pool(feats, data.batch)
         out = F.relu(self.linear(x))
-        # out = F.sigmoid(out)
-        # out[:, 0] = out[:, 0] * 2 * torch.pi
-        # out[:, 1] = out[:, 1] * torch.pi
         return out
