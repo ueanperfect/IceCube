@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 #ignore from here
-/data/
+/data/LSTM_data/pointpicker_mpc128_n9_batch_101.npz
 /checkpoints/
